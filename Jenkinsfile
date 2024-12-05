@@ -2,46 +2,46 @@ pipeline {
     agent any
 
     tools {
-        // Utilisation de Maven et JDK configurés dans Jenkins
-        maven 'M2_HOME'  // Nom que vous avez défini pour Maven
-        jdk 'JAVA_HOME'  // Nom que vous avez défini pour Java
+        maven 'M2_HOME' // Utilisez le nom défini dans Jenkins pour Maven
+        jdk 'JAVA_HOME'  // Utilisez le nom défini dans Jenkins pour Java
     }
 
     stages {
         stage('Checkout') {
             steps {
-                // Cloner votre projet depuis GitHub
+                // Cloner le dépôt depuis GitHub
                 git branch: 'main', url: 'https://github.com/Ghada-boukhari/events.git'
             }
         }
 
         stage('Maven Clean') {
             steps {
-                // Exécution de la commande Maven Clean
+                // Exécuter la commande Maven clean
                 sh 'mvn clean'
             }
         }
 
         stage('Maven Build') {
             steps {
-                // Exécution de la commande Maven Build
-                sh 'mvn install -DskipTests'
+                // Exécuter la commande Maven pour construire le projet
+                sh 'mvn package'
             }
         }
 
         stage('Run Unit Tests') {
             steps {
-                // Exécution des tests unitaires avec Maven
+                // Exécuter les tests unitaires avec Maven
                 sh 'mvn test'
             }
         }
+    }
 
-        // Étape pour les actions post-pipeline (si nécessaire)
-        stage('Post Actions') {
-            steps {
-                echo 'Pipeline terminé !'
-            }
+    post {
+        always {
+            // Action après le pipeline
+            echo 'Pipeline terminé.'
         }
     }
 }
+
 
