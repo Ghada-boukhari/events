@@ -2,22 +2,22 @@ pipeline {
     agent any
 
     tools {
-        // Nom exact tel que défini dans Jenkins Tool Configuration
-        maven 'Maven-3.9.9'    // Maven 3.9.9
-        jdk 'java-17-openjdk'  // Java 17
+        // Utilisez le nom exact tel que défini dans la configuration des outils de Jenkins
+        maven 'Maven-3.9.9'    // Le nom de Maven configuré dans Global Tool Configuration
+        jdk 'java-17-openjdk'  // Le nom du JDK configuré dans Global Tool Configuration
     }
 
     environment {
-        // Définition explicite des variables d'environnement
-        JAVA_HOME = tool name: 'java-17-openjdk', type: 'JDK'
-        M2_HOME = tool name: 'Maven-3.9.9', type: 'Maven'
-        PATH = "${JAVA_HOME}/bin:${M2_HOME}/bin:${env.PATH}"
+        // Assurez-vous de définir JAVA_HOME et M2_HOME avec les chemins corrects
+        JAVA_HOME = '/usr/lib/jvm/java-17-openjdk-amd64/'  // Modifiez si nécessaire pour correspondre à votre installation
+        M2_HOME = '/opt/apache-maven-3.9.9' // Modifiez si nécessaire pour correspondre à votre installation
+        PATH = "${JAVA_HOME}/bin:${M2_HOME}/bin:${env.PATH}"  // Ajoutez les répertoires bin au PATH
     }
 
     stages {
         stage('Checkout') {
             steps {
-                checkout scm
+                checkout scm  // Récupérer le code source depuis Git
             }
         }
 
@@ -25,7 +25,7 @@ pipeline {
             steps {
                 script {
                     echo "Running Maven clean..."
-                    sh 'mvn clean'
+                    sh 'mvn clean'  // Nettoyage avec Maven
                 }
             }
         }
@@ -33,8 +33,8 @@ pipeline {
         stage('Maven Build') {
             steps {
                 script {
-                    echo "Running Maven build..."
-                    sh 'mvn install'
+                    echo "Building with Maven..."
+                    sh 'mvn install'  // Compiler avec Maven
                 }
             }
         }
@@ -42,8 +42,8 @@ pipeline {
         stage('Run Unit Tests') {
             steps {
                 script {
-                    echo "Running unit tests..."
-                    sh 'mvn test'
+                    echo "Running Unit Tests..."
+                    sh 'mvn test'  // Exécuter les tests unitaires avec Maven
                 }
             }
         }
@@ -51,7 +51,7 @@ pipeline {
 
     post {
         always {
-            echo 'Pipeline finished'
+            echo "Pipeline finished!"
         }
     }
 }
