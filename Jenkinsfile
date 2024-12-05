@@ -2,48 +2,56 @@ pipeline {
     agent any
 
     tools {
-        maven 'M2_HOME'  // Utilisez le nom configuré pour Maven dans Jenkins
-        jdk 'JAVA_HOME'  // Utilisez le nom configuré pour Java dans Jenkins
+        // Nom exact tel que défini dans Jenkins Tool Configuration
+        maven 'Maven-3.9.9'    // Maven 3.9.9
+        jdk 'java-17-openjdk'  // Java 17
     }
 
     environment {
-        JAVA_HOME = '/usr/lib/jvm/java-17-openjdk-amd64'  // Ajoutez cette ligne pour définir explicitement JAVA_HOME
+        // Définition explicite des variables d'environnement
+        JAVA_HOME = tool name: 'java-17-openjdk', type: 'JDK'
+        M2_HOME = tool name: 'Maven-3.9.9', type: 'Maven'
+        PATH = "${JAVA_HOME}/bin:${M2_HOME}/bin:${env.PATH}"
     }
 
     stages {
         stage('Checkout') {
             steps {
-                // Cloner le dépôt depuis GitHub
-                git branch: 'main', url: 'https://github.com/Ghada-boukhari/events.git'
+                checkout scm
             }
         }
 
         stage('Maven Clean') {
             steps {
-                // Exécuter la commande Maven clean
-                sh 'mvn clean'
+                script {
+                    echo "Running Maven clean..."
+                    sh 'mvn clean'
+                }
             }
         }
 
         stage('Maven Build') {
             steps {
-                // Exécuter la commande Maven pour construire le projet
-                sh 'mvn package'
+                script {
+                    echo "Running Maven build..."
+                    sh 'mvn install'
+                }
             }
         }
 
         stage('Run Unit Tests') {
             steps {
-                // Exécuter les tests unitaires avec Maven
-                sh 'mvn test'
+                script {
+                    echo "Running unit tests..."
+                    sh 'mvn test'
+                }
             }
         }
     }
 
     post {
         always {
-            // Action après le pipeline
-            echo 'Pipeline terminé.'
+            echo 'Pipeline finished'
         }
     }
 }
