@@ -2,8 +2,12 @@ pipeline {
     agent any
 
     tools {
-        maven 'M2_HOME' // Utilisez le nom défini dans Jenkins pour Maven
-        jdk 'JAVA_HOME'  // Utilisez le nom défini dans Jenkins pour Java
+        maven 'M2_HOME'  // Utilisez le nom configuré pour Maven dans Jenkins
+        jdk 'JAVA_HOME'  // Utilisez le nom configuré pour Java dans Jenkins
+    }
+
+    environment {
+        JAVA_HOME = '/usr/lib/jvm/java-17-openjdk-amd64'  // Ajoutez cette ligne pour définir explicitement JAVA_HOME
     }
 
     stages {
@@ -43,5 +47,4 @@ pipeline {
         }
     }
 }
-
 
