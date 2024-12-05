@@ -3,21 +3,22 @@ pipeline {
 
     tools {
         // Utilisez le nom exact tel que défini dans la configuration des outils de Jenkins
-        maven 'Maven-3.9.9'    // Le nom de Maven configuré dans Global Tool Configuration
-        jdk 'java-17-openjdk'  // Le nom du JDK configuré dans Global Tool Configuration
+        maven 'Maven-3.9.9'   // Le nom de Maven configuré dans Global Tool Configuration
+        jdk 'java-17-openjdk' // Le nom du JDK configuré dans Global Tool Configuration
     }
 
     environment {
         // Assurez-vous de définir JAVA_HOME et M2_HOME avec les chemins corrects
         JAVA_HOME = '/usr/lib/jvm/java-17-openjdk-amd64/'  // Modifiez si nécessaire pour correspondre à votre installation
-        M2_HOME = '/opt/apache-maven-3.9.9' // Modifiez si nécessaire pour correspondre à votre installation
-        PATH = "${JAVA_HOME}/bin:${M2_HOME}/bin:${env.PATH}"  // Ajoutez les répertoires bin au PATH
+        M2_HOME = '/opt/apache-maven-3.9.9'                 // Modifiez si nécessaire pour correspondre à votre installation
+        PATH = "${JAVA_HOME}/bin:${M2_HOME}/bin:${env.PATH}" // Ajoutez les répertoires bin au PATH
     }
 
     stages {
         stage('Checkout') {
             steps {
-                checkout scm  // Récupérer le code source depuis Git
+                // Récupérer le code source depuis GitHub
+                checkout scm
             }
         }
 
@@ -25,7 +26,8 @@ pipeline {
             steps {
                 script {
                     echo "Running Maven clean..."
-                    sh 'mvn clean'  // Nettoyage avec Maven
+                    // Nettoyage du projet Maven
+                    sh 'mvn clean'
                 }
             }
         }
@@ -34,7 +36,8 @@ pipeline {
             steps {
                 script {
                     echo "Building with Maven..."
-                    sh 'mvn install'  // Compiler avec Maven
+                    // Compilation du projet Maven
+                    sh 'mvn install'
                 }
             }
         }
@@ -43,7 +46,18 @@ pipeline {
             steps {
                 script {
                     echo "Running Unit Tests..."
-                    sh 'mvn test'  // Exécuter les tests unitaires avec Maven
+                    // Exécution des tests unitaires avec Maven
+                    sh 'mvn test'
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                script {
+                    echo "Deploying the application..."
+                    // Ajoutez ici la commande pour déployer votre application si nécessaire
+                    // Exemple : sh 'mvn deploy'
                 }
             }
         }
@@ -52,6 +66,18 @@ pipeline {
     post {
         always {
             echo "Pipeline finished!"
+        }
+
+        success {
+            echo "Build and tests succeeded!"
+        }
+
+        failure {
+            echo "Build or tests failed!"
+        }
+
+        unstable {
+            echo "Build unstable!"
         }
     }
 }
