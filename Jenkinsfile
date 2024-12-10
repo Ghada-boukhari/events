@@ -5,7 +5,7 @@ pipeline {
         // Utilisez les noms configurés dans Jenkins
         maven 'Maven-3.8.7'   // Nom du Maven dans Jenkins
         jdk 'java-17-openjdk' // Nom du JDK dans Jenkins
-        sonar 'SonarQubeScanner' // Nom correct du SonarQube Scanner dans Jenkins (ou 'SonarRunner' selon votre configuration)
+         
     }
 
     environment {
@@ -15,8 +15,9 @@ pipeline {
         PATH = "${JAVA_HOME}/bin:${M2_HOME}/bin:${env.PATH}"
         
         // Définir le token d'authentification SonarQube dans l'environnement
-        SONAR_TOKEN = credentials('sonartoken') // Récupérer le token SonarQube depuis Jenkins credentials
+      
         SONARSERVER = 'sonarserver'  // Le nom du serveur SonarQube dans Jenkins
+        SONARSCANNER = 'SonarQubeScanner'
     }
 
     stages {
