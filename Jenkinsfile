@@ -2,10 +2,10 @@ pipeline {
     agent any
 
     tools {
-        // Utilisez les noms configurés dans Jenkins (ou dans le conteneur si vous les avez installés manuellement)
+        // Utilisez les noms configurés dans Jenkins
         maven 'Maven-3.8.7'   // Nom du Maven dans Jenkins
         jdk 'java-17-openjdk' // Nom du JDK dans Jenkins
-        sonarScanner 'sonarscanner' // Nom du SonarQube Scanner dans Jenkins
+        sonar 'SonarQubeScanner' // Nom correct du SonarQube Scanner dans Jenkins (ou 'SonarRunner' selon votre configuration)
     }
 
     environment {
@@ -59,7 +59,7 @@ pipeline {
 
         stage('Sonar Analysis') {
             environment {
-                scannerHome = tool 'sonarscanner' // Utiliser le SonarQube Scanner configuré dans Jenkins
+                scannerHome = tool 'SonarQubeScanner' // Utiliser le SonarQube Scanner configuré dans Jenkins
             }
             steps {
                 withSonarQubeEnv("${SONARSERVER}") {
