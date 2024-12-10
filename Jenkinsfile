@@ -51,6 +51,16 @@ pipeline {
             }
         }
 
+        stage('Generate JaCoCo Report') {
+            steps {
+                script {
+                    echo "Generating JaCoCo coverage report..."
+                    // Générer le rapport JaCoCo avec Maven
+                    sh 'mvn jacoco:report'
+                }
+            }
+        }
+
         stage('SonarQube Analysis') {
             steps {
                 script {
