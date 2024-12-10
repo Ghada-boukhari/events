@@ -5,7 +5,7 @@ pipeline {
         // Utilisation des outils configurés dans Jenkins
         maven 'Maven-3.8.7'  // Nom du Maven dans Jenkins
         jdk 'java-17-openjdk'  // Nom du JDK dans Jenkins
-        sonarQubeScanner 'SonarQubeScanner'  // Utilisation du SonarQube Scanner configuré dans Jenkins
+        sonarRunner 'SonarQubeScanner'  // Utilisation de l'outil SonarQubeScanner configuré dans Jenkins
     }
 
     environment {
