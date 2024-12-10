@@ -59,7 +59,7 @@ pipeline {
                     echo "Running SonarQube analysis..."
                     // Effectuer l'analyse de qualité du code avec SonarQube
                     withSonarQubeEnv('sonar') { // Utiliser les credentials SonarQube configurés dans Jenkins
-                        sh 'mvn sonar:sonar -Dsonar.login=$SONAR_TOKEN'
+                        sh 'mvn sonar:sonar -Dsonar.login=${SONAR_TOKEN}'
                     }
                 }
             }
