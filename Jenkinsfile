@@ -8,9 +8,10 @@ pipeline {
     }
 
     environment {
-        // Définir le token SonarQube depuis les credentials Jenkins
-        SONAR_TOKEN = credentials('sonartoken')  // Utilisation du token SonarQube depuis Jenkins credentials
-        SONARSERVER = 'http://192.168.33.10:9000'  // URL du serveur SonarQube local
+        // Définir les variables d'environnement
+        SONAR_TOKEN = credentials('sonartoken')  // Token SonarQube depuis Jenkins credentials
+        SONARSERVER = 'http://192.168.33.10:9000'  // URL du serveur SonarQube
+        MAVEN_SETTINGS = '/home/vagrant/.m2/settings.xml'  // Chemin vers le fichier settings.xml pour Nexus
     }
 
     stages {
@@ -80,6 +81,16 @@ pipeline {
                         -Dsonar.login=${SONAR_TOKEN} \
                         -Dsonar.host.url=${SONARSERVER}
                     """
+                }
+            }
+        }
+
+        stage('Deploy to Nexus') {
+            steps {
+                script {
+                    echo "Deploying to Nexus..."
+                    // Déployer l'artefact vers Nexus en utilisant le fichier settings.xml pour l'authentification
+                    sh 'mvn deploy -s ${MAVEN_SETTINGS}'
                 }
             }
         }
