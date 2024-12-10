@@ -2,28 +2,27 @@ pipeline {
     agent any
 
     tools {
-        // Utilisez les noms configurés dans Jenkins
-        maven 'Maven-3.8.7'   // Nom du Maven dans Jenkins
-        jdk 'java-17-openjdk' // Nom du JDK dans Jenkins
-         
+        // Utilisation des outils configurés dans Jenkins
+        maven 'Maven-3.8.7'  // Nom du Maven dans Jenkins
+        jdk 'java-17-openjdk'  // Nom du JDK dans Jenkins
     }
 
     environment {
-        // Définir JAVA_HOME et M2_HOME en fonction des chemins exacts dans votre conteneur Jenkins
-        JAVA_HOME = '/opt/java/openjdk'   // Le chemin vers Java dans votre conteneur Jenkins
-        M2_HOME = '/usr/share/maven'      // Le chemin vers Maven dans votre conteneur Jenkins
+        // Définir les chemins d'accès aux outils Java et Maven
+        JAVA_HOME = '/opt/java/openjdk'  // Le chemin vers Java dans votre conteneur Jenkins
+        M2_HOME = '/usr/share/maven'     // Le chemin vers Maven dans votre conteneur Jenkins
         PATH = "${JAVA_HOME}/bin:${M2_HOME}/bin:${env.PATH}"
         
-        // Définir le token d'authentification SonarQube dans l'environnement
-       SONAR_TOKEN = credentials('sonartoken')  // Utilisation du token SonarQube depuis Jenkins credentials
-        SONARSERVER = 'sonarserver'  // Le nom du serveur SonarQube dans Jenkins
-        SONARSCANNER = 'SonarQubeScanner'
+        // Définir le token SonarQube depuis les credentials Jenkins
+        SONAR_TOKEN = credentials('sonartoken')  // Utilisation du token SonarQube depuis Jenkins credentials
+        SONARSERVER = 'http://192.168.33.10:9000'  // Remplacer par l'URL de votre serveur SonarQube local
+        SONARSCANNER = tool 'SonarQubeScanner'  // Nom du scanner SonarQube configuré dans Jenkins
     }
 
     stages {
         stage('Checkout') {
             steps {
-                // Récupérer le code source depuis GitHub
+                // Récupérer le code source depuis le repository Git
                 checkout scm
             }
         }
@@ -32,7 +31,7 @@ pipeline {
             steps {
                 script {
                     echo "Running Maven clean..."
-                    // Effectuer le nettoyage du projet Maven
+                    // Exécuter la commande Maven clean
                     sh 'mvn clean'
                 }
             }
@@ -42,7 +41,7 @@ pipeline {
             steps {
                 script {
                     echo "Building with Maven..."
-                    // Compiler le projet Maven
+                    // Compiler le projet avec Maven
                     sh 'mvn install'
                 }
             }
@@ -58,15 +57,12 @@ pipeline {
             }
         }
 
-        stage('Sonar Analysis') {
-            environment {
-                scannerHome = tool 'SonarQubeScanner' // Utiliser le SonarQube Scanner configuré dans Jenkins
-            }
+        stage('SonarQube Analysis') {
             steps {
-                 script {
+                script {
                     echo "Running SonarQube analysis..."
-                    // Lancer l'analyse SonarQube avec le token d'authentification
-                    sh '''/var/jenkins_home/tools/hudson.plugins.sonar.SonarRunnerInstallation/SonarQubeScanner/bin/sonar-scanner \
+                    // Lancer l'analyse SonarQube
+                    sh '''${SONARSCANNER}/bin/sonar-scanner \
                         -Dsonar.projectKey=vprofile \
                         -Dsonar.projectName=vprofile \
                         -Dsonar.projectVersion=1.0 \
@@ -75,8 +71,8 @@ pipeline {
                         -Dsonar.junit.reportsPath=target/surefire-reports/ \
                         -Dsonar.jacoco.reportsPath=target/jacoco.exec \
                         -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml \
-                        -Dsonar.login=${SONAR_TOKEN}'''  // Ajouter le token ici
-                
+                        -Dsonar.login=${SONAR_TOKEN} \
+                        -Dsonar.host.url=${SONARSERVER}'''  // Utilisation de SONAR_TOKEN et SONARSERVER
                 }
             }
         }
