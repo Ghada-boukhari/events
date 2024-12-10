@@ -5,15 +5,9 @@ pipeline {
         // Utilisation des outils configurés dans Jenkins
         maven 'Maven-3.8.7'  // Nom du Maven dans Jenkins
         jdk 'java-17-openjdk'  // Nom du JDK dans Jenkins
-        sonarRunner 'SonarQubeScanner'  // Utilisation de l'outil SonarQubeScanner configuré dans Jenkins
     }
 
     environment {
-        // Définir les chemins d'accès aux outils Java et Maven
-        JAVA_HOME = '/opt/java/openjdk'  // Le chemin vers Java dans votre conteneur Jenkins
-        M2_HOME = '/usr/share/maven'     // Le chemin vers Maven dans votre conteneur Jenkins
-        PATH = "${JAVA_HOME}/bin:${M2_HOME}/bin:${env.PATH}"
-        
         // Définir le token SonarQube depuis les credentials Jenkins
         SONAR_TOKEN = credentials('sonartoken')  // Utilisation du token SonarQube depuis Jenkins credentials
         SONARSERVER = 'http://192.168.33.10:9000'  // Remplacer par l'URL de votre serveur SonarQube local
