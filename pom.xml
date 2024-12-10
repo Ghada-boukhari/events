@@ -18,6 +18,7 @@
 
     <properties>
         <java.version>1.8</java.version>
+        <sonar.login>sqa_1137c39aeb90d078f5b92b05633927ce7421c80b</sonar.login> <!-- Jeton d'authentification SonarQube -->
     </properties>
 
     <dependencies>
@@ -83,6 +84,13 @@
                 <configuration>
                     <tagNameFormat>v@{project.version}</tagNameFormat>
                 </configuration>
+            </plugin>
+
+            <!-- Plugin SonarQube pour l'analyse de code -->
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>3.9.0.2155</version>
             </plugin>
         </plugins>
     </build>

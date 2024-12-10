@@ -55,8 +55,8 @@ pipeline {
             steps {
                 script {
                     echo "Running SonarQube analysis..."
-                    // Lancer l'analyse SonarQube avec les paramètres configurés
-                    sh '''sonar-scanner \
+                    // Utilisation de SonarQube avec le plugin Maven au lieu de sonar-scanner
+                    sh '''mvn sonar:sonar \
                         -Dsonar.projectKey=backend \
                         -Dsonar.projectName=backend \
                         -Dsonar.projectVersion=1.0 \
