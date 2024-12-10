@@ -5,6 +5,7 @@ pipeline {
         // Utilisez les noms configurés dans Jenkins (ou dans le conteneur si vous les avez installés manuellement)
         maven 'Maven-3.8.7'   // Nom du Maven dans Jenkins
         jdk 'java-17-openjdk' // Nom du JDK dans Jenkins
+        sonarScanner 'sonarscanner' // Nom du SonarQube Scanner dans Jenkins
     }
 
     environment {
@@ -12,7 +13,10 @@ pipeline {
         JAVA_HOME = '/opt/java/openjdk'   // Le chemin vers Java dans votre conteneur Jenkins
         M2_HOME = '/usr/share/maven'      // Le chemin vers Maven dans votre conteneur Jenkins
         PATH = "${JAVA_HOME}/bin:${M2_HOME}/bin:${env.PATH}"
-        SONAR_TOKEN = credentials('events-token') // Récupérer le token SonarQube depuis Jenkins credentials
+        
+        // Définir le token d'authentification SonarQube dans l'environnement
+        SONAR_TOKEN = credentials('sonartoken') // Récupérer le token SonarQube depuis Jenkins credentials
+        SONARSERVER = 'sonarserver'  // Le nom du serveur SonarQube dans Jenkins
     }
 
     stages {
@@ -53,14 +57,20 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
+        stage('Sonar Analysis') {
+            environment {
+                scannerHome = tool 'sonarscanner' // Utiliser le SonarQube Scanner configuré dans Jenkins
+            }
             steps {
-                script {
-                    echo "Running SonarQube analysis..."
-                    // Effectuer l'analyse de qualité du code avec SonarQube
-                    withSonarQubeEnv('sonar') { // Utiliser les credentials SonarQube configurés dans Jenkins
-                        sh 'mvn sonar:sonar -Dsonar.login=${SONAR_TOKEN}'
-                    }
+                withSonarQubeEnv("${SONARSERVER}") {
+                    sh '''${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=vprofile \
+                    -Dsonar.projectName=vprofile \
+                    -Dsonar.projectVersion=1.0 \
+                    -Dsonar.sources=src/ \
+                    -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/ \
+                    -Dsonar.junit.reportsPath=target/surefire-reports/ \
+                    -Dsonar.jacoco.reportsPath=target/jacoco.exec \
+                    -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml'''
                 }
             }
         }
