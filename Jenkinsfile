@@ -2,16 +2,17 @@ pipeline {
     agent any
 
     tools {
-        // Utilisation des outils configurés dans Jenkins
         maven 'Maven-3.8.7'  // Nom du Maven dans Jenkins
         jdk 'java-17-openjdk'  // Nom du JDK dans Jenkins
     }
 
     environment {
-        // Définir les variables d'environnement
+        // Variables d'environnement
         SONAR_TOKEN = credentials('sonartoken')  // Token SonarQube depuis Jenkins credentials
         SONARSERVER = 'http://192.168.33.10:9000'  // URL du serveur SonarQube
         MAVEN_SETTINGS = '/home/vagrant/.m2/settings.xml'  // Chemin vers le fichier settings.xml pour Nexus
+        DOCKER_USERNAME = credentials('dockerhub_credentials')  // ID des credentials Docker Hub
+        DOCKER_PASSWORD = credentials('dockerhub_credentials')  // ID des credentials Docker Hub
     }
 
     stages {
@@ -85,12 +86,16 @@ pipeline {
             }
         }
 
-        stage('Deploy to Nexus') {
+        stage('Docker Build and Push') {
             steps {
                 script {
-                    echo "Deploying to Nexus..."
-                    // Déployer l'artefact vers Nexus en utilisant le fichier settings.xml pour l'authentification
-                    sh 'mvn deploy -s ${MAVEN_SETTINGS}'
+                    echo "Building Docker image..."
+                    // Connexion à Docker Hub
+                    sh "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin"
+                    // Construction de l'image Docker
+                    sh "docker build -t ghadaboukhari/eventsproject:latest ."
+                    // Push de l'image vers Docker Hub
+                    sh "docker push ghadaboukhari/eventsproject:latest"
                 }
             }
         }
