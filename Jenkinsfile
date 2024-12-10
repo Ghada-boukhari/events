@@ -10,7 +10,7 @@ pipeline {
     environment {
         // Définir le token SonarQube depuis les credentials Jenkins
         SONAR_TOKEN = credentials('sonartoken')  // Utilisation du token SonarQube depuis Jenkins credentials
-        SONARSERVER = 'http://192.168.33.10:9000'  // Remplacer par l'URL de votre serveur SonarQube local
+        SONARSERVER = 'http://192.168.33.10:9000'  // URL du serveur SonarQube local
     }
 
     stages {
@@ -55,18 +55,21 @@ pipeline {
             steps {
                 script {
                     echo "Running SonarQube analysis..."
-                    // Utilisation de SonarQube avec le plugin Maven au lieu de sonar-scanner
-                    sh '''mvn sonar:sonar \
+                    // Lancer l'analyse SonarQube avec les paramètres configurés
+                    sh """
+                    mvn sonar:sonar \
                         -Dsonar.projectKey=backend \
                         -Dsonar.projectName=backend \
                         -Dsonar.projectVersion=1.0 \
-                        -Dsonar.sources=src/ \
+                        -Dsonar.sources=src/main/java \
+                        -Dsonar.tests=src/test/java \
                         -Dsonar.java.binaries=target/classes \
                         -Dsonar.junit.reportsPath=target/surefire-reports/ \
                         -Dsonar.jacoco.reportsPath=target/jacoco.exec \
                         -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml \
                         -Dsonar.login=${SONAR_TOKEN} \
-                        -Dsonar.host.url=${SONARSERVER}'''
+                        -Dsonar.host.url=${SONARSERVER}
+                    """
                 }
             }
         }
@@ -78,11 +81,11 @@ pipeline {
         }
 
         success {
-            echo "Build and tests succeeded!"
+            echo "Build and analysis succeeded!"
         }
 
         failure {
-            echo "Build or tests failed!"
+            echo "Build or analysis failed!"
         }
     }
 }
