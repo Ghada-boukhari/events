@@ -12,6 +12,7 @@ pipeline {
         JAVA_HOME = '/opt/java/openjdk'   // Le chemin vers Java dans votre conteneur Jenkins
         M2_HOME = '/usr/share/maven'      // Le chemin vers Maven dans votre conteneur Jenkins
         PATH = "${JAVA_HOME}/bin:${M2_HOME}/bin:${env.PATH}"
+        SONAR_TOKEN = credentials('events-token') // Récupérer le token SonarQube depuis Jenkins credentials
     }
 
     stages {
@@ -48,6 +49,18 @@ pipeline {
                     echo "Running Unit Tests..."
                     // Lancer les tests unitaires avec Maven (JUnit)
                     sh 'mvn test'
+                }
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                script {
+                    echo "Running SonarQube analysis..."
+                    // Effectuer l'analyse de qualité du code avec SonarQube
+                    withSonarQubeEnv('sonar') { // Utiliser les credentials SonarQube configurés dans Jenkins
+                        sh 'mvn sonar:sonar -Dsonar.login=$SONAR_TOKEN'
+                    }
                 }
             }
         }
