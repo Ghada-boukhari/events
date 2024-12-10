@@ -15,7 +15,7 @@ pipeline {
         PATH = "${JAVA_HOME}/bin:${M2_HOME}/bin:${env.PATH}"
         
         // Définir le token d'authentification SonarQube dans l'environnement
-      
+       SONAR_TOKEN = credentials('sonartoken')  // Utilisation du token SonarQube depuis Jenkins credentials
         SONARSERVER = 'sonarserver'  // Le nom du serveur SonarQube dans Jenkins
         SONARSCANNER = 'SonarQubeScanner'
     }
