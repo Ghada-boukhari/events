@@ -18,7 +18,7 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <sonar.login>sqa_1137c39aeb90d078f5b92b05633927ce7421c80b</sonar.login> <!-- Jeton d'authentification SonarQube -->
+        <sonar.login>sqa_1137c39aeb90d078f5b92b05633927ce7421c80b</sonar.login>
     </properties>
 
     <dependencies>
@@ -114,8 +114,32 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- Plugin Maven Deploy pour le déploiement vers Nexus -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>3.0.0-M1</version>
+                <configuration>
+                    <altDeploymentRepository>
+                        nexus::default::http://192.168.33.10:8081/repository/maven-releases/
+                    </altDeploymentRepository>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
-</project>
 
+    <distributionManagement>
+        <repository>
+            <id>nexus-releases</id>
+            <name>Nexus Releases</name>
+            <url>http://192.168.33.10:8081/repository/maven-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>nexus-snapshots</id>
+            <name>Nexus Snapshots</name>
+            <url>http://192.168.33.10:8081/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+</project>
 
