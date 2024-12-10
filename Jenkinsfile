@@ -5,7 +5,7 @@ pipeline {
         // Utilisation des outils configurés dans Jenkins
         maven 'Maven-3.8.7'  // Nom du Maven dans Jenkins
         jdk 'java-17-openjdk'  // Nom du JDK dans Jenkins
-       
+        sonarQubeScanner 'SonarQubeScanner'  // Utilisation du SonarQube Scanner configuré dans Jenkins
     }
 
     environment {
@@ -17,7 +17,6 @@ pipeline {
         // Définir le token SonarQube depuis les credentials Jenkins
         SONAR_TOKEN = credentials('sonartoken')  // Utilisation du token SonarQube depuis Jenkins credentials
         SONARSERVER = 'http://192.168.33.10:9000'  // Remplacer par l'URL de votre serveur SonarQube local
-        SONARSCANNER = 'SonarQubeScanner'
     }
 
     stages {
@@ -63,7 +62,7 @@ pipeline {
                 script {
                     echo "Running SonarQube analysis..."
                     // Lancer l'analyse SonarQube avec les paramètres configurés
-                    sh '''${SONARSCANNER}/bin/sonar-scanner \
+                    sh '''sonar-scanner \
                         -Dsonar.projectKey=backend \
                         -Dsonar.projectName=backend \
                         -Dsonar.projectVersion=1.0 \
