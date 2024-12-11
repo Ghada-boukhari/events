@@ -2,17 +2,15 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven-3.8.7'  // Nom du Maven dans Jenkins
-        jdk 'java-17-openjdk'  // Nom du JDK dans Jenkins
+        // Utilisation des outils configurés dans Jenkins
+        maven 'Maven-3.8.7'  // Nom du Maven configuré dans Jenkins
+        jdk 'java-17-openjdk'  // Nom du JDK configuré dans Jenkins
     }
 
     environment {
         // Variables d'environnement
-        SONAR_TOKEN = credentials('sonartoken')  // Token SonarQube depuis Jenkins credentials
-        SONARSERVER = 'http://192.168.33.10:9000'  // URL du serveur SonarQube
-        MAVEN_SETTINGS = '/home/vagrant/.m2/settings.xml'  // Chemin vers le fichier settings.xml pour Nexus
-        DOCKER_USERNAME = credentials('dockerhub_credentials')  // ID des credentials Docker Hub
-        DOCKER_PASSWORD = credentials('dockerhub_credentials')  // ID des credentials Docker Hub
+        DOCKER_CREDENTIALS_ID = 'dockerhub_credentials' // ID des credentials Docker Hub dans Jenkins
+        DOCKER_IMAGE_NAME = 'ghadaboukhari/events:latest' // Nom de l'image Docker
     }
 
     stages {
@@ -27,7 +25,6 @@ pipeline {
             steps {
                 script {
                     echo "Running Maven clean..."
-                    // Exécuter la commande Maven clean
                     sh 'mvn clean'
                 }
             }
@@ -37,7 +34,6 @@ pipeline {
             steps {
                 script {
                     echo "Building with Maven..."
-                    // Compiler le projet avec Maven
                     sh 'mvn install'
                 }
             }
@@ -47,7 +43,6 @@ pipeline {
             steps {
                 script {
                     echo "Running Unit Tests..."
-                    // Lancer les tests unitaires avec Maven (JUnit)
                     sh 'mvn test'
                 }
             }
@@ -57,7 +52,6 @@ pipeline {
             steps {
                 script {
                     echo "Generating JaCoCo coverage report..."
-                    // Générer le rapport JaCoCo avec Maven
                     sh 'mvn jacoco:report'
                 }
             }
@@ -67,7 +61,6 @@ pipeline {
             steps {
                 script {
                     echo "Running SonarQube analysis..."
-                    // Lancer l'analyse SonarQube avec les paramètres configurés
                     sh """
                     mvn sonar:sonar \
                         -Dsonar.projectKey=backend \
@@ -78,7 +71,6 @@ pipeline {
                         -Dsonar.java.binaries=target/classes \
                         -Dsonar.junit.reportsPath=target/surefire-reports/ \
                         -Dsonar.jacoco.reportsPath=target/jacoco.exec \
-                        -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml \
                         -Dsonar.login=${SONAR_TOKEN} \
                         -Dsonar.host.url=${SONARSERVER}
                     """
@@ -86,16 +78,28 @@ pipeline {
             }
         }
 
-        stage('Docker Build and Push') {
+        stage('Build Docker Image') {
             steps {
                 script {
                     echo "Building Docker image..."
-                    // Connexion à Docker Hub
-                    sh "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin"
-                    // Construction de l'image Docker
-                    sh "docker build -t ghadaboukhari/eventsproject:latest ."
-                    // Push de l'image vers Docker Hub
-                    sh "docker push ghadaboukhari/eventsproject:latest"
+                    sh """
+                    docker build -t ${DOCKER_IMAGE_NAME} .
+                    """
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    echo "Pushing Docker image to Docker Hub..."
+                    withCredentials([usernamePassword(credentialsId: "${DOCKER_CREDENTIALS_ID}", usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        sh """
+                        echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+                        docker push ${DOCKER_IMAGE_NAME}
+                        docker logout
+                        """
+                    }
                 }
             }
         }
@@ -103,15 +107,13 @@ pipeline {
 
     post {
         always {
-            echo "Pipeline finished!"
+            echo "Pipeline execution completed."
         }
-
         success {
-            echo "Build and analysis succeeded!"
+            echo "Pipeline executed successfully!"
         }
-
         failure {
-            echo "Build or analysis failed!"
+            echo "Pipeline failed. Please check the logs."
         }
     }
 }
