@@ -2,21 +2,20 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven-3.8.7'  // Nom du Maven dans Jenkins
-        jdk 'java-17-openjdk'  // Nom du JDK dans Jenkins
+        maven 'Maven-3.8.7'
+        jdk 'java-17-openjdk'
     }
 
     environment {
-        // Variables d'environnement
-        SONAR_TOKEN = credentials('sonartoken')  // Token SonarQube depuis Jenkins credentials
-        SONARSERVER = 'http://192.168.33.10:9000'  // URL du serveur SonarQube
-        MAVEN_SETTINGS = '/home/vagrant/.m2/settings.xml'  // Chemin vers le fichier settings.xml pour Nexus
+        SONAR_TOKEN = credentials('sonartoken')
+        SONARSERVER = 'http://192.168.33.10:9000'
+        MAVEN_SETTINGS = '/home/vagrant/.m2/settings.xml'
+        DOCKER_HOST = 'tcp://dind:2375'
     }
 
     stages {
         stage('Checkout') {
             steps {
-                // Récupérer le code source depuis le repository Git
                 checkout scm
             }
         }
@@ -25,7 +24,6 @@ pipeline {
             steps {
                 script {
                     echo "Running Maven clean..."
-                    // Exécuter la commande Maven clean
                     sh 'mvn clean'
                 }
             }
@@ -35,7 +33,6 @@ pipeline {
             steps {
                 script {
                     echo "Building with Maven..."
-                    // Compiler le projet avec Maven
                     sh 'mvn install'
                 }
             }
@@ -45,7 +42,6 @@ pipeline {
             steps {
                 script {
                     echo "Running Unit Tests..."
-                    // Lancer les tests unitaires avec Maven (JUnit)
                     sh 'mvn test'
                 }
             }
@@ -55,7 +51,6 @@ pipeline {
             steps {
                 script {
                     echo "Generating JaCoCo coverage report..."
-                    // Générer le rapport JaCoCo avec Maven
                     sh 'mvn jacoco:report'
                 }
             }
@@ -65,7 +60,6 @@ pipeline {
             steps {
                 script {
                     echo "Running SonarQube analysis..."
-                    // Lancer l'analyse SonarQube avec les paramètres configurés
                     sh """
                     mvn sonar:sonar \
                         -Dsonar.projectKey=backend \
@@ -88,15 +82,20 @@ pipeline {
             steps {
                 script {
                     echo "Building Docker image..."
-                    // Connexion à Docker Hub de manière sécurisée avec les credentials
                     withCredentials([usernamePassword(credentialsId: 'dockerhub_credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        // Connexion Docker Hub avec les credentials
                         sh "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin"
-                        // Construction de l'image Docker
                         sh "docker build -t ghadaboukhari/eventsproject:latest ."
-                        // Push de l'image vers Docker Hub
                         sh "docker push ghadaboukhari/eventsproject:latest"
                     }
+                }
+            }
+        }
+
+        stage('Deploy with Docker Compose') {
+            steps {
+                script {
+                    echo "Deploying with Docker Compose..."
+                    sh 'docker-compose up -d'
                 }
             }
         }
