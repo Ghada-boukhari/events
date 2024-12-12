@@ -10,7 +10,7 @@ pipeline {
         SONAR_TOKEN = credentials('sonartoken')
         SONARSERVER = 'http://192.168.33.10:9000'
         MAVEN_SETTINGS = '/home/vagrant/.m2/settings.xml'
-        DOCKER_HOST = 'tcp://dind:2375'
+        DOCKER_HOST = 'tcp://172.17.0.5:2375'
     }
 
     stages {
