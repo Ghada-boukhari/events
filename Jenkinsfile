@@ -11,7 +11,6 @@ pipeline {
         SONAR_TOKEN = credentials('sonartoken')  // Token SonarQube depuis Jenkins credentials
         SONARSERVER = 'http://192.168.33.10:9000'  // URL du serveur SonarQube
         MAVEN_SETTINGS = '/home/vagrant/.m2/settings.xml'  // Chemin vers le fichier settings.xml pour Nexus
-        DOCKER_SOCKET = "/var/run/docker.sock"  // Chemin vers le socket Docker pour permettre l'exécution Docker depuis Jenkins
     }
 
     stages {
@@ -81,19 +80,6 @@ pipeline {
                         -Dsonar.login=${SONAR_TOKEN} \
                         -Dsonar.host.url=${SONARSERVER}
                     """
-                }
-            }
-        }
-
-        stage('Attach Docker Daemon') {
-            steps {
-                script {
-                    echo "Attaching Docker Daemon to Jenkins..."
-                    // Assurez-vous que Docker fonctionne en affichant la version
-                    sh 'docker --version'
-
-                    // Connectez le conteneur Jenkins au démon Docker
-                    sh 'docker exec -it jenkins /bin/bash -c "docker --version"'
                 }
             }
         }
